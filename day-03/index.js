@@ -1,22 +1,48 @@
 const fs = require("fs");
 const path = require("path");
 
+// PART 1
 (function () {
+  console.group("part 1");
   const input = fs.readFileSync("map.txt").toString();
   const lines = input.split("\n").filter((line) => line !== "\n");
 
-  // update these 2 values for each run through down the slope
-  const rightStepSize = 1;
-  const downStepSize = 2;
+  const treeCount = countTreesOnTheWayDown(lines, 3, 1);
+  console.groupEnd();
+})();
 
-  const rowLength = lines[0].length;
-  const rowCount = lines.length;
-  console.log(`each row is ${rowLength} long`);
+// PART 2
+(function () {
+  console.group("part 2");
+  const input = fs.readFileSync("map.txt").toString();
+  const lines = input.split("\n").filter((line) => line !== "\n");
+
+  const treeCounts = [
+    countTreesOnTheWayDown(lines, 1, 1),
+    countTreesOnTheWayDown(lines, 3, 1),
+    countTreesOnTheWayDown(lines, 5, 1),
+    countTreesOnTheWayDown(lines, 7, 1),
+    countTreesOnTheWayDown(lines, 1, 2),
+  ];
+
+  let logLine = "";
+  const finalAnswer = treeCounts.reduce((left, right, idx) => {
+    logLine += idx === 1 ? `${left} * ${right} ` : `* ${right} `;
+    return left * right;
+  });
+
+  console.log(`ANSWER: ${logLine}= ${finalAnswer}`);
+  console.groupEnd();
+})();
+
+function countTreesOnTheWayDown(mapLines, rightStepSize, downStepSize) {
+  const rowLength = mapLines[0].length;
+  const rowCount = mapLines.length;
 
   const downSteps = downStepSize * rowCount;
   const rightSteps = rightStepSize * rowCount;
   console.log(
-    `we need to make ${downSteps} down steps and ${rightSteps} right steps`
+    `> we need to make ${downSteps} down steps and ${rightSteps} right steps`
   );
 
   const mapMultiplier = Math.max(downSteps, rightStepSize);
@@ -28,31 +54,31 @@ const path = require("path");
     repeatCount += 1;
   }
 
-  console.log(`we need the map to repeat right ${repeatCount} times`);
+  console.log(`> repeat map right ${repeatCount} times`);
 
   // create the full map
-  const mapLines = lines.map((s) => s.repeat(repeatCount));
+  const fullMap = mapLines.map((s) => s.repeat(repeatCount));
   const path = [];
 
   for (
     let i = 0, right = rightStepSize;
-    i < mapLines.length;
+    i < fullMap.length;
     i += downStepSize, right += rightStepSize
   ) {
     const nextStep = i + downStepSize;
-    if (nextStep >= mapLines.length) {
+    if (nextStep >= fullMap.length) {
       break;
     }
 
-    path.push(mapLines[nextStep][right]);
+    path.push(fullMap[nextStep][right]);
   }
 
   const treeCount = path.reduce(
     (prev, curr) => (curr === "#" ? prev + 1 : prev),
     0
   );
-  console.log(`enountered ${treeCount} trees`);
-})();
 
-// RESULTs FOR PART 2
-// 90,244,97,92,48
+  console.log(`> encountered ${treeCount} trees`);
+  console.log(`---`);
+  return treeCount;
+}
